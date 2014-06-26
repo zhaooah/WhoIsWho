@@ -8,7 +8,7 @@ class GetProfile(SGMLParser):
 		SGMLParser.__init__(self)
 		self.name = ""
 		self.pic=""
-		self.right=1
+		self.right=1 #Check if picture is valid
 		self.haspicture=0
 	#When find correct div class,set flags
 	def start_div(self,attrs):
@@ -32,6 +32,21 @@ class GetProfile(SGMLParser):
 							self.name=val
 
 
+
+def generateAlbum(names):
+	print 'Start generating html file...'
+	page='<table style="width:480px"><tr>'
+	for i in range(0,len(names)):
+		if i!=0 and i%4==0:
+			#Start a new line every 4 photos
+			page=page+'</tr><tr>'
+		page=page+'<td>'+'<img src="pic/'+ names[i]+'.jpg"><p>'+names[i]+'</p></td>'
+	page=page+'</tr></table>'
+	outfile = open('album.html',"w")
+	outfile.write(page)
+	outfile.close()
+
+
 #Read linkedin list
 file = open('NameList.txt', 'r')
 NameList=file.read().splitlines()
@@ -41,7 +56,9 @@ NameList=file.read().splitlines()
 if not os.path.exists('pic'):
     os.makedirs('pic')
 
-print "Starting fetch pictures..."
+print "Start fetching pictures..."
+
+people=[]
 
 for i in range(0,len(NameList)):
 	#Get Page
@@ -50,8 +67,11 @@ for i in range(0,len(NameList)):
 		profile=GetProfile()
 		profile.feed(content)
 		if profile.haspicture==1:
+			people.append(profile.name)
 			print profile.name,profile.pic
 			urllib.urlretrieve(profile.pic,'pic/'+profile.name+'.jpg')
 		profile.close()
+
+generateAlbum(people)
 
 
